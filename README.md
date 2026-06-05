@@ -86,24 +86,29 @@ Playwright runs 18 end-to-end tests covering the full quiz flow, result screen, 
 ```
 src/
   collections/
-    Quizzes.ts       quiz schema — title, questions array, results array
-    Submissions.ts   saved results — score, breakdown, email, notes (encrypted)
+    Quizzes.ts         quiz schema — title, questions array, results array
+    Submissions.ts     saved results — score, breakdown, email, notes (encrypted)
   lib/
-    encryption.ts    shift cipher used by the notes hooks
-    scoring.ts       computeScore and matchResult (including the score-13 override)
+    encryption.ts      shift cipher used by the notes hooks
+    scoring.ts         computeScore and matchResult (including the score-13 override)
+    shuffle.ts         Fisher-Yates shuffle used server-side on question options
+  types/
+    quiz.ts            shared types — QuizResult, BreakdownEntry, SelectedOption, SaveState
   seed/
-    quiz.ts          seeds the sample quiz on first run, skips if data exists
+    quiz.ts            seeds the sample quiz on first run, skips if data exists
   actions/
-    quiz.ts          server actions — submitQuiz, saveResult, lookupByEmail
+    quiz.ts            server actions — submitQuiz, saveResult, lookupByEmail
   app/
     (frontend)/
       page.tsx           quiz page — server component, fetches and shuffles options
       lookup/page.tsx    past results page
       components/
-        QuizForm.tsx     one-question-at-a-time UI, client component
-        ResultView.tsx   score, breakdown table, save panel
-        LookupForm.tsx   email lookup form
-        SiteHeader.tsx   top nav
+        BreakdownTable/  shared score breakdown table, used by result and lookup views
+        QuizForm/        one-question-at-a-time UI, client component
+        ResultView/      score, breakdown, save panel
+        LookupForm/      email lookup form
+        SiteHeader/      top nav
+        index.ts         barrel export for all components
 ```
 
 ---
@@ -131,7 +136,7 @@ If the total is exactly 13, the result is replaced with the easter egg message b
 
 **Saving results**
 
-After seeing their result, users can optionally add notes and an email address. Clicking "Save result" calls the `saveResult` server action, which writes a Submission to the database. If no email is provided, nothing is saved — the result is still shown.
+After seeing their result, users can optionally add notes and an email address. Clicking "Save result" calls the `saveResult` server action. The server re-fetches the quiz, recomputes the score from the original selected options, and writes the Submission. Score and label from the client are ignored entirely. If no email is provided, nothing is saved.
 
 **Looking up past results**
 
@@ -139,7 +144,7 @@ After seeing their result, users can optionally add notes and an email address. 
 
 **Notes encryption**
 
-The `notes` field on Submissions is encrypted before it hits the database using a shift cipher (as specified in the brief). A `beforeChange` hook encrypts incoming plaintext. An `afterRead` hook decrypts on every read, so the admin UI and the lookup flow both get readable text automatically. This is a toy cipher per the brief, not production cryptography.
+The `notes` field on Submissions is encrypted before it hits the database using a shift cipher (as specified in the brief). A `beforeChange` hook encrypts incoming plaintext on create. An `afterRead` hook decrypts on every read, so the admin UI and the lookup flow both get readable text automatically. Encryption only runs on creation so admin edits do not re-encrypt already-stored ciphertext. This is a toy cipher per the brief, not production cryptography.
 
 **Editable from Payload admin**
 
@@ -150,6 +155,8 @@ Questions, option labels, option scores, question order, and result ranges are a
 ## What I prioritized
 
 The data layer came first — collections, encryption hooks, scoring logic — because the rest of the app depends on it being correct. Once that was solid, the server actions and UI were straightforward to wire up.
+
+Score computation happens server-side twice: once on submit (to show the result) and again on save (to write to the database). The client never supplies a score that gets persisted — it only supplies the selected option IDs, and the server does the math both times.
 
 I kept client-side JavaScript to a minimum. The quiz page is a server component. The only client component is `QuizForm`, which handles answer selection and calls server actions on submit. There is no client-side state management library.
 
@@ -166,5 +173,5 @@ The one-question-at-a-time flow was a deliberate UX choice over showing all 10 q
 ## Assumptions
 
 - One quiz at a time. The app fetches the first quiz in the collection. Supporting multiple quizzes would need a routing change.
-- The `notes` field is only encrypted on creation, not on admin edits. Updating notes through the Payload admin would re-encrypt already-encrypted text. Since submissions are write-once in normal use this is not an issue, but worth noting.
+- Notes are only encrypted on creation. Updates through the Payload admin are not re-encrypted since submissions are effectively write-once in normal use.
 - Postgres is expected locally via Docker. No SQLite fallback was added since the brief specifies Postgres.
