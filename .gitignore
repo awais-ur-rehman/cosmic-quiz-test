@@ -39,8 +39,14 @@ yarn-error.log*
 next-env.d.ts
 
 .env
+test.env
 
 /media
+
+# Claude / AI tooling
+.claude/
+CLAUDE.md
+.mcp.json
 
 # Playwright
 node_modules/

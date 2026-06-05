@@ -1,260 +1,177 @@
-> NOTE: Please make sure to CLONE(NOT FORK) this repo and create a new repo in your Github. DO NOT submit a PR in this repo.
+# Cosmic Quiz
 
+A 10-question cosmic personality quiz built with Next.js 15, Payload CMS 3, and Postgres. Questions and scoring are managed through the Payload admin. Results are saved per email and can be retrieved later.
 
-# Full Stack Developer Quiz App Test
-This template comes configured with the bare minimum to get started on anything you need.
+---
 
-##  Overview
+## Stack
 
-Your task is to build a **minimal but functional quiz app** using:
+- Next.js 15 (App Router)
+- Payload CMS 3 with Postgres
+- Tailwind CSS v4
+- TypeScript
 
-- **Next.js** (latest version. Use either SSR or SSG) + typescript
-- **Payload CMS** (connected to **Postgres**)
-- **Tailwind CSS** for styling
+---
 
-The quiz is based on a cosmic personality test (see sample JSON below). The app must meet the outlined user journeys and backend criteria. Bonus points for modularity, maintainability, clarity, and simplicity.
+## Running locally
 
-## Quick Start - local setup
-To spin up this template locally, follow these steps:
+**Requirements:** Node 20+, pnpm, Docker (for Postgres)
 
-### Development
+**1. Clone and install**
 
-1. First [clone the repo](#clone) if you have not done so already
-2. Connect with your local postgres instance and input credentials in `.env`
-3. `npm install && npm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
-
-
-## Test data
-
-You’ll use this data (store in Payload CMS) to build the quiz:
-
-<details>
-<summary>📦 Sample Quiz Data:</summary>
-
-```json
-{
-  "title": "What Kind of Cosmic Animal Are You?",
-  "questions": [
-    {
-      "id": 1,
-      "question": "What's your ideal weekend vibe?",
-      "options": [
-        { "label": "Stargazing in silence 🌌", "score": 0 },
-        { "label": "A road trip with no map 🚗", "score": 1 },
-        { "label": "Organizing your sock drawer 🧦", "score": 2 },
-        { "label": "Hosting a secret underground rave 💃", "score": 3 }
-      ]
-    },
-    {
-      "id": 2,
-      "question": "How do you respond to conflict?",
-      "options": [
-        { "label": "Meditate and wait for the storm to pass 🧘", "score": 0 },
-        { "label": "Speak up, but keep it chill 😎", "score": 1 },
-        { "label": "Write a pros-and-cons list 📋", "score": 2 },
-        { "label": "Throw a pie (or a metaphorical one) 🥧", "score": 3 }
-      ]
-    },
-    {
-      "id": 3,
-      "question": "Which color calls to your soul?",
-      "options": [
-        { "label": "Deep violet 💜", "score": 0 },
-        { "label": "Electric blue ⚡", "score": 1 },
-        { "label": "Earthy brown 🌱", "score": 2 },
-        { "label": "Neon green 🟢", "score": 3 }
-      ]
-    },
-    {
-      "id": 4,
-      "question": "Your dream mode of transport?",
-      "options": [
-        { "label": "Flying carpet 🪄", "score": 0 },
-        { "label": "Teleportation 💫", "score": 1 },
-        { "label": "Tank 🛡️", "score": 2 },
-        { "label": "Unicycle on fire 🔥", "score": 3 }
-      ]
-    },
-    {
-      "id": 5,
-      "question": "Pick a snack:",
-      "options": [
-        { "label": "Moon cheese 🧀", "score": 0 },
-        { "label": "Spicy chips 🌶️", "score": 1 },
-        { "label": "Wasabi popcorn 🍿", "score": 2 },
-        { "label": "Cosmic brownies 🍫", "score": 3 }
-      ]
-    },
-    {
-      "id": 6,
-      "question": "What's your greatest strength?",
-      "options": [
-        { "label": "Patience", "score": 0 },
-        { "label": "Curiosity", "score": 1 },
-        { "label": "Planning", "score": 2 },
-        { "label": "Chaos energy", "score": 3 }
-      ]
-    },
-    {
-      "id": 7,
-      "question": "Choose a celestial body:",
-      "options": [
-        { "label": "The Moon 🌕", "score": 0 },
-        { "label": "A comet ☄️", "score": 1 },
-        { "label": "A black hole 🕳️", "score": 2 },
-        { "label": "A rogue planet 🌑", "score": 3 }
-      ]
-    },
-    {
-      "id": 8,
-      "question": "What's your social energy?",
-      "options": [
-        { "label": "Low-key lurker", "score": 0 },
-        { "label": "One-on-one convos", "score": 1 },
-        { "label": "Team brainstormer", "score": 2 },
-        { "label": "Life of the party", "score": 3 }
-      ]
-    },
-    {
-      "id": 9,
-      "question": "What’s your spirit time of day?",
-      "options": [
-        { "label": "3am under the stars 🌌", "score": 0 },
-        { "label": "Sunrise hustle 🌅", "score": 1 },
-        { "label": "Midday focus ☀️", "score": 2 },
-        { "label": "Midnight rebellion 🌒", "score": 3 }
-      ]
-    },
-    {
-      "id": 10,
-      "question": "What animal resonates with you most?",
-      "options": [
-        { "label": "Owl 🦉", "score": 0 },
-        { "label": "Fox 🦊", "score": 1 },
-        { "label": "Bear 🐻", "score": 2 },
-        { "label": "Dragon 🐉", "score": 3 }
-      ]
-    }
-  ],
-  "results": [
-    { "range": [0, 6], "label": "🌙 Mooncat — Mysterious, calm, and observant." },
-    { "range": [7, 14], "label": "🦊 Solar Fox — Clever, curious, and adaptable." },
-    { "range": [15, 22], "label": "🐻 Cosmic Bear — Grounded, strong, and thoughtful." },
-    { "range": [23, 30], "label": "🐉 Galactic Dragon — Wild, bold, and unstoppable." }
-  ]
-}
+```bash
+git clone <your-repo-url>
+cd test-fullstack-web-cms-next
+pnpm install
 ```
 
+**2. Set up environment**
 
-</details>
-
-
-
-## User Journey
-
-Your implementation **must** support the following flow, if possible in one or 2 pages maximum to save time:
-
-### ✅ Required Features
-1. **Take the quiz**
-   - Display each question and options(shuffled)
-   - Allow user to answer all 10 questions
-   - On submit, calculate total score and show matching result label
-   
-2. **Score page**
-   - Show total score and matching cosmic animal
-   - Show how the score was calculated (score breakdown or logic)
-   - Include an optional free-text **"Notes" field**
-   - Add a playful easter egg: If the user scores exactly 13, replace the label with ‘You lucky fucker! You scored 13 exactly.’
-
-3. **Email saving**
-   - Ask user for email (optional)
-   - If user enters it, **store quiz results + score + notes** in the DB
-
-4. **Retrieve old results**
-   - User enters email
-   - App shows previous quiz score, notes, breakdown, just like the score page
-
-5. **Data encryption**
-   - Encrypt/decrypt ONLY one field("Notes" if any) field in Payload using Hooks. See code snippet below.
-   - Acceptable methods:
-     - Store hashed data in DB, decrypt it for display
-     - See `Payload Encryption (Notes Field)` section for exact code snippet
-
-
-## Technical Requirements
-
-- Use only:
-  - **Next.js**
-  - **Payload CMS** + **Postgres**
-  - **TailwindCSS**
-- Minimal client-side JavaScript
-- No 3rd party quiz libraries or AI-generated code
-- Modular, readable, production-quality code
-- Follow clean architecture: reusable components, services, and schema definitions
-- Document logic where needed (README inline or in code)
-- Focus on **clarity, naming conventions, maintainability**
-
-
-## Bonus Points, optional
-
-- ✅ Questions & options editable from Payload CMS UI
-  - Support question order, option scores, etc.
-- ✅ Mobile responsive
-- ✅ SSG with fallback or SSR for score screen
-- ✅ CI/CD setup or `.env.example` for local testing
-- ✅ No client-side state management lib required
-
-
-## Scoring Logic
-
-| Score Range | Result                     |
---|
-| 0–6         | 🌙 Mooncat                 |
-| 7–14        | 🦊 Solar Fox               |
-| 15–22       | 🐻 Cosmic Bear             |
-| 23–30       | 🐉 Galactic Dragon         |
-
-> Each question has 4 options scored 0–3.
-> Sum all selected option scores.
-> Match total score with result range.
-
-
-## Payload Encryption (Notes Field)
-
-Use Payload Hooks to:
-- **Before save:** Encrypt the `notes` field
-- **After read:** Decrypt it for admin and API use
-- Just don’t store notes in plain text
-
-Use the following code snippet to save time.
-```ts
-export function encrypt(str, shift = 3) {
-  return str
-    .split('')
-    .map(char => String.fromCharCode(char.charCodeAt(0) + shift))
-    .join('');
-}
-
-export function decrypt(str, shift = 3) {
-  return str
-    .split('')
-    .map(char => String.fromCharCode(char.charCodeAt(0) - shift))
-    .join('');
-}
+```bash
+cp .env.example .env
 ```
 
+Edit `.env`:
 
-## Submission
-- Upload to GitHub and share a **public repo**
-- Include instructions to run CMS (`yarn`, `.env`, Docker if needed)
-- Link to deployed app (if hosted)
-- Be prepared to walk through the structure
+```
+DATABASE_URI=postgresql://postgres:postgres@localhost:5432/cosmic_quiz
+PAYLOAD_SECRET=pick-any-random-string
+```
 
-## Notes
-What to do if test takes longer than 2 hours?
-**Before exceeding 2 hours**, Write a brief note in your README explaining:
-- Which parts you prioritized and why  
-- Which parts you skipped or simplified and why  
-- What you would do to complete or improve the test if given more time  
-- Any assumptions or architectural choices you made  
+**3. Start Postgres**
+
+```bash
+docker compose up -d
+```
+
+This starts a Postgres instance on port 5432 and creates the `cosmic_quiz` database automatically.
+
+**4. Start the dev server**
+
+```bash
+pnpm dev
+```
+
+On first boot, Payload runs migrations and seeds the quiz. Open `http://localhost:3000`.
+
+**5. Payload admin**
+
+`http://localhost:3000/admin` — create an admin user on first visit. From there you can edit questions, options, scores, and result ranges directly.
+
+---
+
+## Building for production
+
+```bash
+pnpm build
+pnpm start
+```
+
+---
+
+## Running tests
+
+Make sure the dev server is running on port 3000, then:
+
+```bash
+pnpm test:e2e
+```
+
+Playwright runs 18 end-to-end tests covering the full quiz flow, result screen, score-13 easter egg, email save, and result lookup.
+
+---
+
+## Project structure
+
+```
+src/
+  collections/
+    Quizzes.ts         quiz schema — title, questions array, results array
+    Submissions.ts     saved results — score, breakdown, email, notes (encrypted)
+  lib/
+    encryption.ts      shift cipher used by the notes hooks
+    scoring.ts         computeScore and matchResult (including the score-13 override)
+    shuffle.ts         Fisher-Yates shuffle used server-side on question options
+  types/
+    quiz.ts            shared types — QuizResult, BreakdownEntry, SelectedOption, SaveState
+  seed/
+    quiz.ts            seeds the sample quiz on first run, skips if data exists
+  actions/
+    quiz.ts            server actions — submitQuiz, saveResult, lookupByEmail
+  app/
+    (frontend)/
+      page.tsx           quiz page — server component, fetches and shuffles options
+      lookup/page.tsx    past results page
+      components/
+        BreakdownTable/  shared score breakdown table, used by result and lookup views
+        QuizForm/        one-question-at-a-time UI, client component
+        ResultView/      score, breakdown, save panel
+        LookupForm/      email lookup form
+        SiteHeader/      top nav
+        index.ts         barrel export for all components
+```
+
+---
+
+## How it works
+
+**Quiz flow**
+
+The quiz page is a server component. It fetches the active quiz from Payload using the local API, shuffles each question's options server-side, and passes the data down as props. The score for each option travels with the shuffled data, so the order never affects scoring.
+
+`QuizForm` is the only client component. It tracks which answer was selected for each question and navigates one question at a time. On the final question, clicking "See my result" calls the `submitQuiz` server action, which re-fetches the quiz from the database, computes the score, and returns the result. Nothing score-related is trusted from the client.
+
+**Scoring**
+
+Each of the 10 questions has 4 options scored 0 through 3. The total ranges from 0 to 30. The result is matched against ranges stored in the quiz:
+
+| Score | Result |
+|---|---|
+| 0-6 | Mooncat |
+| 7-14 | Solar Fox |
+| 15-22 | Cosmic Bear |
+| 23-30 | Galactic Dragon |
+
+If the total is exactly 13, the result is replaced with the easter egg message before range matching runs.
+
+**Saving results**
+
+After seeing their result, users can optionally add notes and an email address. Clicking "Save result" calls the `saveResult` server action. The server re-fetches the quiz, recomputes the score from the original selected options, and writes the Submission. Score and label from the client are ignored entirely. If no email is provided, nothing is saved.
+
+**Looking up past results**
+
+`/lookup` accepts an email and returns the most recent Submission for that address. Notes come back decrypted via the Payload `afterRead` hook.
+
+**Notes encryption**
+
+The `notes` field on Submissions is encrypted before it hits the database using a shift cipher (as specified in the brief). A `beforeChange` hook encrypts incoming plaintext on create. An `afterRead` hook decrypts on every read, so the admin UI and the lookup flow both get readable text automatically. Encryption only runs on creation so admin edits do not re-encrypt already-stored ciphertext. This is a toy cipher per the brief, not production cryptography.
+
+**Editable from Payload admin**
+
+Questions, option labels, option scores, question order, and result ranges are all stored as Payload collection fields. Everything can be changed from the admin UI without touching code.
+
+---
+
+## What I prioritized
+
+The data layer came first — collections, encryption hooks, scoring logic — because the rest of the app depends on it being correct. Once that was solid, the server actions and UI were straightforward to wire up.
+
+Score computation happens server-side twice: once on submit (to show the result) and again on save (to write to the database). The client never supplies a score that gets persisted — it only supplies the selected option IDs, and the server does the math both times.
+
+I kept client-side JavaScript to a minimum. The quiz page is a server component. The only client component is `QuizForm`, which handles answer selection and calls server actions on submit. There is no client-side state management library.
+
+The one-question-at-a-time flow was a deliberate UX choice over showing all 10 questions at once. It keeps the interface focused and makes it easier to track progress.
+
+## What I would improve with more time
+
+- Error boundaries around the quiz and lookup pages so a failed fetch shows something useful instead of a blank screen.
+- Email format validation with inline feedback before the save request goes out.
+- A way to take the quiz multiple times and see a history of results, not just the latest.
+- The shift cipher is per the brief. In a real app this would be AES-256 or similar, with the key in an environment variable.
+- The seed runs on every `onInit` call and exits early if data exists. For production this would be a proper migration script.
+
+## Assumptions
+
+- One quiz at a time. The app fetches the first quiz in the collection. Supporting multiple quizzes would need a routing change.
+- Notes are only encrypted on creation. Updates through the Payload admin are not re-encrypted since submissions are effectively write-once in normal use.
+- Postgres is expected locally via Docker. No SQLite fallback was added since the brief specifies Postgres.
