@@ -122,14 +122,20 @@ export default function QuizForm({ quizId, title, questions }: Props) {
 
       <div className="max-w-3xl mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
-          <span className="text-xs font-medium uppercase tracking-widest text-muted">
+          <span
+            data-testid="question-counter"
+            className="text-xs font-medium uppercase tracking-widest text-muted"
+          >
             {currentIndex + 1} / {questions.length}
           </span>
           <span className="text-xs text-muted">{title}</span>
         </div>
 
         <div className="mb-10">
-          <p className="text-2xl font-semibold text-text leading-snug mb-8">
+          <p
+            data-testid="question-text"
+            className="text-2xl font-semibold text-text leading-snug mb-8"
+          >
             {current.question}
           </p>
 
@@ -139,6 +145,8 @@ export default function QuizForm({ quizId, title, questions }: Props) {
               return (
                 <button
                   key={opt.label}
+                  data-testid="option-button"
+                  data-score={opt.score}
                   onClick={() => selectOption(opt)}
                   className={`w-full text-left px-5 py-4 border text-sm font-medium transition-colors ${
                     selected
@@ -160,6 +168,7 @@ export default function QuizForm({ quizId, title, questions }: Props) {
         <div className="flex items-center gap-3">
           {currentIndex > 0 && (
             <button
+              data-testid="back-button"
               onClick={handleBack}
               className="px-6 py-3 border border-border text-sm font-medium text-muted hover:border-text hover:text-text transition-colors"
             >
@@ -168,6 +177,7 @@ export default function QuizForm({ quizId, title, questions }: Props) {
           )}
 
           <button
+            data-testid="next-button"
             disabled={!currentAnswer || isSubmitting}
             onClick={handleNext}
             className="flex-1 py-3 bg-text text-white text-sm font-medium hover:bg-[#333] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"

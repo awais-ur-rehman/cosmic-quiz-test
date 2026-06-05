@@ -51,7 +51,9 @@ export default function LookupForm() {
       </div>
 
       {notFound && (
-        <p className="text-sm text-muted">No results found for that email address.</p>
+        <p data-testid="not-found-message" className="text-sm text-muted">
+          No results found for that email address.
+        </p>
       )}
 
       {result && (
@@ -61,7 +63,9 @@ export default function LookupForm() {
               Your previous result
             </p>
             <div className="flex items-end gap-4 mb-2">
-              <span className="text-[60px] font-bold leading-none text-accent">{result.score}</span>
+              <span data-testid="lookup-result-score" className="text-[60px] font-bold leading-none text-accent">
+                {result.score}
+              </span>
               <span className="text-xs text-muted mb-2">out of 30</span>
             </div>
             <p className="text-lg font-semibold text-text">{result.label}</p>

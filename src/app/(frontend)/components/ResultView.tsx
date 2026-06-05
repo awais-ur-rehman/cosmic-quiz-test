@@ -38,10 +38,14 @@ export default function ResultView({
           Your result
         </p>
         <div className="flex items-end gap-4">
-          <span className="text-[72px] font-bold leading-none text-accent">{score}</span>
+          <span data-testid="result-score" className="text-[72px] font-bold leading-none text-accent">
+            {score}
+          </span>
           <span className="text-xs text-muted mb-3">out of 30</span>
         </div>
-        <p className="text-xl font-semibold text-text mt-3">{label}</p>
+        <p data-testid="result-label" className="text-xl font-semibold text-text mt-3">
+          {label}
+        </p>
       </div>
 
       <div>
@@ -52,6 +56,7 @@ export default function ResultView({
           {breakdown.map((entry, i) => (
             <div
               key={i}
+              data-testid="breakdown-row"
               className={`flex items-start justify-between gap-4 px-4 py-3 text-sm ${
                 i < breakdown.length - 1 ? 'border-b border-border' : ''
               }`}
@@ -104,11 +109,12 @@ export default function ResultView({
         </div>
 
         {saved ? (
-          <p className="text-sm text-green-700 font-medium">
+          <p data-testid="save-confirmation" className="text-sm text-green-700 font-medium">
             Saved. You can retrieve your result at any time from Past results.
           </p>
         ) : (
           <button
+            data-testid="save-button"
             disabled={!email || isSaving}
             onClick={onSave}
             className="w-full py-3 bg-accent text-white text-sm font-medium hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
