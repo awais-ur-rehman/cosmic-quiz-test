@@ -1,6 +1,5 @@
-import type { BreakdownEntry } from '@/actions/quiz'
-
-type SaveState = 'idle' | 'saving' | 'saved' | 'error'
+import type { BreakdownEntry, SaveState } from '@/types/quiz'
+import BreakdownTable from '../BreakdownTable'
 
 type Props = {
   score: number
@@ -52,23 +51,7 @@ export default function ResultView({
         <p className="text-xs font-medium uppercase tracking-widest text-muted mb-3">
           Score breakdown
         </p>
-        <div className="border border-border">
-          {breakdown.map((entry, i) => (
-            <div
-              key={i}
-              data-testid="breakdown-row"
-              className={`flex items-start justify-between gap-4 px-4 py-3 text-sm ${
-                i < breakdown.length - 1 ? 'border-b border-border' : ''
-              }`}
-            >
-              <span className="text-muted flex-1 leading-snug">{entry.question}</span>
-              <span className="text-text font-medium shrink-0">{entry.selectedLabel}</span>
-              <span className="text-accent font-semibold font-mono w-4 text-right shrink-0">
-                {entry.score}
-              </span>
-            </div>
-          ))}
-        </div>
+        <BreakdownTable breakdown={breakdown} />
       </div>
 
       <div className="border border-border p-6 space-y-4">

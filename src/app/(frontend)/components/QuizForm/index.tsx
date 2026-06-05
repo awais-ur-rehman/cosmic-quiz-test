@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { submitQuiz, saveResult } from '@/actions/quiz'
-import type { QuizResult } from '@/actions/quiz'
-import ResultView from './ResultView'
+import type { QuizResult, SaveState, SelectedOption } from '@/types/quiz'
+import ResultView from '../ResultView'
 
 type Option = { label: string; score: number }
 type Question = { id: string; question: string; options: Option[] }
@@ -14,12 +14,11 @@ type Props = {
   questions: Question[]
 }
 
-type SaveState = 'idle' | 'saving' | 'saved' | 'error'
-
 export default function QuizForm({ quizId, title, questions }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, { label: string; score: number }>>({})
   const [result, setResult] = useState<QuizResult | null>(null)
+  const [selected, setSelected] = useState<SelectedOption[]>([])
   const [submitError, setSubmitError] = useState('')
   const [isSubmitting, startSubmitTransition] = useTransition()
 
@@ -53,7 +52,7 @@ export default function QuizForm({ quizId, title, questions }: Props) {
 
   function handleSubmit() {
     setSubmitError('')
-    const selected = questions.map((q) => ({
+    const opts: SelectedOption[] = questions.map((q) => ({
       questionId: q.id,
       question: q.question,
       label: answers[q.id]!.label,
@@ -62,7 +61,8 @@ export default function QuizForm({ quizId, title, questions }: Props) {
 
     startSubmitTransition(async () => {
       try {
-        const res = await submitQuiz(quizId, selected)
+        const res = await submitQuiz(quizId, opts)
+        setSelected(opts)
         setResult(res)
       } catch {
         setSubmitError('Something went wrong. Please try again.')
@@ -71,11 +71,11 @@ export default function QuizForm({ quizId, title, questions }: Props) {
   }
 
   function handleSave() {
-    if (!email || !result) return
+    if (!email || !selected.length) return
     setSaveState('saving')
     startSaveTransition(async () => {
       try {
-        await saveResult(quizId, result, notes, email)
+        await saveResult(quizId, selected, notes, email)
         setSaveState('saved')
       } catch {
         setSaveState('error')
@@ -87,6 +87,7 @@ export default function QuizForm({ quizId, title, questions }: Props) {
     setCurrentIndex(0)
     setAnswers({})
     setResult(null)
+    setSelected([])
     setSubmitError('')
     setNotes('')
     setEmail('')
@@ -141,7 +142,7 @@ export default function QuizForm({ quizId, title, questions }: Props) {
 
           <div className="space-y-2">
             {current.options.map((opt) => {
-              const selected = currentAnswer?.label === opt.label
+              const isSelected = currentAnswer?.label === opt.label
               return (
                 <button
                   key={opt.label}
@@ -149,7 +150,7 @@ export default function QuizForm({ quizId, title, questions }: Props) {
                   data-score={opt.score}
                   onClick={() => selectOption(opt)}
                   className={`w-full text-left px-5 py-4 border text-sm font-medium transition-colors ${
-                    selected
+                    isSelected
                       ? 'bg-accent border-accent text-white'
                       : 'bg-white border-border text-text hover:border-text'
                   }`}
@@ -161,9 +162,7 @@ export default function QuizForm({ quizId, title, questions }: Props) {
           </div>
         </div>
 
-        {submitError && (
-          <p className="text-red-600 text-sm mb-4">{submitError}</p>
-        )}
+        {submitError && <p className="text-red-600 text-sm mb-4">{submitError}</p>}
 
         <div className="flex items-center gap-3">
           {currentIndex > 0 && (

@@ -3,27 +3,9 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { computeScore, matchResult } from '@/lib/scoring'
+import type { BreakdownEntry, QuizResult, SelectedOption } from '@/types/quiz'
 
-export type BreakdownEntry = {
-  question: string
-  selectedLabel: string
-  score: number
-}
-
-export type QuizResult = {
-  score: number
-  label: string
-  breakdown: BreakdownEntry[]
-  notes?: string
-  email?: string
-}
-
-type SelectedOption = {
-  questionId: string
-  label: string
-  score: number
-  question: string
-}
+export type { BreakdownEntry, QuizResult, SelectedOption }
 
 export async function submitQuiz(
   quizId: string,
@@ -32,7 +14,6 @@ export async function submitQuiz(
   const payload = await getPayload({ config })
 
   const quiz = await payload.findByID({ collection: 'quizzes', id: Number(quizId) })
-
   const results = (quiz.results ?? []) as { min: number; max: number; label: string }[]
 
   const score = computeScore(selected.map((s) => s.score))
@@ -49,21 +30,36 @@ export async function submitQuiz(
 
 export async function saveResult(
   quizId: string,
-  result: QuizResult,
+  selected: SelectedOption[],
   notes: string,
   email: string,
 ): Promise<{ saved: boolean }> {
   if (!email) return { saved: false }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) return { saved: false }
+
   const payload = await getPayload({ config })
+
+  const quiz = await payload.findByID({ collection: 'quizzes', id: Number(quizId) })
+  const results = (quiz.results ?? []) as { min: number; max: number; label: string }[]
+
+  const score = computeScore(selected.map((s) => s.score))
+  const label = matchResult(score, results)
+
+  const breakdown: BreakdownEntry[] = selected.map((s) => ({
+    question: s.question,
+    selectedLabel: s.label,
+    score: s.score,
+  }))
 
   await payload.create({
     collection: 'submissions',
     data: {
       quiz: Number(quizId),
-      score: result.score,
-      result: result.label,
-      breakdown: result.breakdown,
+      score,
+      result: label,
+      breakdown,
       email,
       notes: notes || undefined,
     } as any,
@@ -73,6 +69,11 @@ export async function saveResult(
 }
 
 export async function lookupByEmail(email: string): Promise<QuizResult | null> {
+  if (!email) return null
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) return null
+
   const payload = await getPayload({ config })
 
   const result = await payload.find({

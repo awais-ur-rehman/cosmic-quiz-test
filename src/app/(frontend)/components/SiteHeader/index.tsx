@@ -7,10 +7,7 @@ export default function SiteHeader() {
         <Link href="/" className="text-sm font-semibold tracking-tight text-text">
           Cosmic Quiz
         </Link>
-        <Link
-          href="/lookup"
-          className="text-sm text-muted hover:text-text transition-colors"
-        >
+        <Link href="/lookup" className="text-sm text-muted hover:text-text transition-colors">
           Past results
         </Link>
       </div>

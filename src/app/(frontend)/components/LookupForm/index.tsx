@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { lookupByEmail } from '@/actions/quiz'
-import type { QuizResult } from '@/actions/quiz'
+import type { QuizResult } from '@/types/quiz'
+import BreakdownTable from '../BreakdownTable'
 
 export default function LookupForm() {
   const [email, setEmail] = useState('')
@@ -75,22 +76,7 @@ export default function LookupForm() {
             <p className="text-xs font-medium uppercase tracking-widest text-muted mb-3">
               Score breakdown
             </p>
-            <div className="border border-border">
-              {result.breakdown.map((entry, i) => (
-                <div
-                  key={i}
-                  className={`flex items-start justify-between gap-4 px-4 py-3 text-sm ${
-                    i < result.breakdown.length - 1 ? 'border-b border-border' : ''
-                  }`}
-                >
-                  <span className="text-muted flex-1 leading-snug">{entry.question}</span>
-                  <span className="text-text font-medium shrink-0">{entry.selectedLabel}</span>
-                  <span className="text-accent font-semibold font-mono w-4 text-right shrink-0">
-                    {entry.score}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <BreakdownTable breakdown={result.breakdown} />
           </div>
 
           {result.notes && (

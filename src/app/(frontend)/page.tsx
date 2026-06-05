@@ -1,16 +1,7 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import QuizForm from './components/QuizForm'
-import SiteHeader from './components/SiteHeader'
-
-function shuffle<T>(arr: T[]): T[] {
-  const out = [...arr]
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[out[i], out[j]] = [out[j], out[i]]
-  }
-  return out
-}
+import { shuffle } from '@/lib/shuffle'
+import { QuizForm, SiteHeader } from './components'
 
 export default async function HomePage() {
   const payload = await getPayload({ config })
@@ -20,7 +11,7 @@ export default async function HomePage() {
   if (!docs.length) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-[#888888]">No quiz found. Check database seed.</p>
+        <p className="text-sm text-muted">No quiz found. Check database seed.</p>
       </div>
     )
   }

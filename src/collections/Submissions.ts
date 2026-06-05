@@ -8,10 +8,9 @@ export const Submissions: CollectionConfig = {
   },
   hooks: {
     beforeChange: [
-      ({ data }) => {
-        if (data.notes && typeof data.notes === 'string') {
-          // Only encrypt plaintext — never re-encrypt an already-encrypted value.
-          // The flag _notesEncrypted guards against double-encryption on update.
+      ({ data, operation }) => {
+        // Only encrypt on create. Updates via admin would otherwise re-encrypt already-encrypted text.
+        if (operation === 'create' && data.notes && typeof data.notes === 'string') {
           data.notes = encrypt(data.notes)
         }
         return data
