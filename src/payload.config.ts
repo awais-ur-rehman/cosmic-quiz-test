@@ -38,6 +38,10 @@ export default buildConfig({
     payloadCloudPlugin(),
   ],
   onInit: async (payload) => {
-    await seedQuiz(payload)
+    try {
+      await seedQuiz(payload)
+    } catch {
+      payload.logger.warn('Seed skipped — database may not be ready yet.')
+    }
   },
 })
