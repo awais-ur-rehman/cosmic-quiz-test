@@ -11,8 +11,11 @@ export default function LookupForm() {
   const [notFound, setNotFound] = useState(false)
   const [isPending, startTransition] = useTransition()
 
+  const emailError =
+    email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'Enter a valid email address.' : ''
+
   function handleLookup() {
-    if (!email) return
+    if (!email || emailError) return
     setNotFound(false)
     setResult(null)
     startTransition(async () => {
@@ -39,15 +42,18 @@ export default function LookupForm() {
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
             placeholder="you@example.com"
-            className="flex-1 border border-border px-4 py-3 text-sm text-text placeholder-[#c0bdb6] focus:outline-none focus:border-text"
+            className={`flex-1 border px-4 py-3 text-sm text-text placeholder-[#c0bdb6] focus:outline-none ${
+              emailError ? 'border-red-400 focus:border-red-400' : 'border-border focus:border-text'
+            }`}
           />
           <button
-            disabled={!email || isPending}
+            disabled={!email || !!emailError || isPending}
             onClick={handleLookup}
             className="px-6 py-3 bg-text text-white text-sm font-medium hover:bg-[#333] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             {isPending ? '...' : 'Look up'}
           </button>
+          {emailError && <p className="text-xs text-red-600 mt-1">{emailError}</p>}
         </div>
       </div>
 

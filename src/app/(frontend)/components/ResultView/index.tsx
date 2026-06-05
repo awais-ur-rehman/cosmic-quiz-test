@@ -29,6 +29,8 @@ export default function ResultView({
   onRetake,
 }: Props) {
   const saved = saveState === 'saved'
+  const emailError =
+    email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? 'Enter a valid email address.' : ''
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12 space-y-10">
@@ -86,8 +88,13 @@ export default function ResultView({
               onChange={(e) => onEmailChange(e.target.value)}
               disabled={saved}
               placeholder="you@example.com"
-              className="w-full border border-border px-3 py-2 text-sm text-text placeholder-[#c0bdb6] focus:outline-none focus:border-text disabled:opacity-50 disabled:bg-surface"
+              className={`w-full border px-3 py-2 text-sm text-text placeholder-[#c0bdb6] focus:outline-none disabled:opacity-50 disabled:bg-surface ${
+                emailError ? 'border-red-400 focus:border-red-400' : 'border-border focus:border-text'
+              }`}
             />
+            {emailError && (
+              <p className="text-xs text-red-600 mt-1">{emailError}</p>
+            )}
           </div>
         </div>
 
@@ -98,7 +105,7 @@ export default function ResultView({
         ) : (
           <button
             data-testid="save-button"
-            disabled={!email || isSaving}
+            disabled={!email || !!emailError || isSaving}
             onClick={onSave}
             className="w-full py-3 bg-accent text-white text-sm font-medium hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >

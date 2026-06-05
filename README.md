@@ -20,7 +20,7 @@ A 10-question cosmic personality quiz built with Next.js 15, Payload CMS 3, and 
 **1. Clone and install**
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/awais-ur-rehman/cosmic-quiz-test.git
 cd test-fullstack-web-cms-next
 pnpm install
 ```
@@ -164,8 +164,6 @@ The one-question-at-a-time flow was a deliberate UX choice over showing all 10 q
 
 ## What I would improve with more time
 
-- Error boundaries around the quiz and lookup pages so a failed fetch shows something useful instead of a blank screen.
-- Email format validation with inline feedback before the save request goes out.
 - A way to take the quiz multiple times and see a history of results, not just the latest.
 - The shift cipher is per the brief. In a real app this would be AES-256 or similar, with the key in an environment variable.
 - The seed runs on every `onInit` call and exits early if data exists. For production this would be a proper migration script.
