@@ -2,7 +2,43 @@
 
 
 # Full Stack Developer Quiz App Test
-This template comes configured with the bare minimum to get started on anything you need.
+
+## Running locally
+
+**Prerequisites:** Node 20+, pnpm, Postgres running locally.
+
+1. Clone the repo
+2. Copy `.env.example` to `.env` and fill in your Postgres connection string and a random `PAYLOAD_SECRET`
+   ```
+   DATABASE_URI=postgresql://postgres:password@localhost:5432/cosmic_quiz
+   PAYLOAD_SECRET=some-random-secret
+   ```
+3. Install dependencies
+   ```
+   pnpm install
+   ```
+4. Start the dev server
+   ```
+   pnpm dev
+   ```
+5. Open `http://localhost:3000` — the quiz loads automatically. The sample quiz is seeded on first run via the Payload `onInit` hook.
+6. Payload admin at `http://localhost:3000/admin`
+
+## Build
+
+```
+pnpm build
+```
+
+## Approach notes
+
+Prioritized first: collections + encryption hooks + scoring logic, since those are the backbone everything else hangs on. Once the data layer was solid, wiring the UI was fast.
+
+Skipped or simplified: no loading spinners beyond the `useTransition` pending state — sufficient for the scope. No custom Payload admin views; the default admin UI already satisfies the "editable from Payload" bonus. The shuffle happens per-render on the server, not stored, which is intentional — shuffled order should not affect scoring.
+
+Architectural choices: quiz page is a server component that fetches via the Payload local API and passes plain serializable props to a single client component (`QuizForm`). The client component owns only the UI state (selected answers, notes, email) and calls a server action on submit. Score computation and DB writes happen entirely on the server. The `afterRead` hook on Submissions decrypts notes transparently, so both the API and the lookup flow get plaintext without any extra handling in application code.
+
+What I would improve with more time: proper error boundaries, a loading skeleton for the quiz page, email validation feedback, and a more polished visual design. I would also consider storing a `_notesPlaintext` flag in the DB to guard absolutely against double-encryption on update (the current guard relies on hook ordering).
 
 ##  Overview
 

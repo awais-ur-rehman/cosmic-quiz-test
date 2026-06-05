@@ -1,0 +1,111 @@
+import type { Payload } from 'payload'
+
+const sampleQuiz = {
+  title: 'What Kind of Cosmic Animal Are You?',
+  questions: [
+    {
+      question: "What's your ideal weekend vibe?",
+      options: [
+        { label: 'Stargazing in silence 🌌', score: 0 },
+        { label: 'A road trip with no map 🚗', score: 1 },
+        { label: 'Organizing your sock drawer 🧦', score: 2 },
+        { label: 'Hosting a secret underground rave 💃', score: 3 },
+      ],
+    },
+    {
+      question: 'How do you respond to conflict?',
+      options: [
+        { label: 'Meditate and wait for the storm to pass 🧘', score: 0 },
+        { label: 'Speak up, but keep it chill 😎', score: 1 },
+        { label: 'Write a pros-and-cons list 📋', score: 2 },
+        { label: 'Throw a pie (or a metaphorical one) 🥧', score: 3 },
+      ],
+    },
+    {
+      question: 'Which color calls to your soul?',
+      options: [
+        { label: 'Deep violet 💜', score: 0 },
+        { label: 'Electric blue ⚡', score: 1 },
+        { label: 'Earthy brown 🌱', score: 2 },
+        { label: 'Neon green 🟢', score: 3 },
+      ],
+    },
+    {
+      question: 'Your dream mode of transport?',
+      options: [
+        { label: 'Flying carpet 🪄', score: 0 },
+        { label: 'Teleportation 💫', score: 1 },
+        { label: 'Tank 🛡️', score: 2 },
+        { label: 'Unicycle on fire 🔥', score: 3 },
+      ],
+    },
+    {
+      question: 'Pick a snack:',
+      options: [
+        { label: 'Moon cheese 🧀', score: 0 },
+        { label: 'Spicy chips 🌶️', score: 1 },
+        { label: 'Wasabi popcorn 🍿', score: 2 },
+        { label: 'Cosmic brownies 🍫', score: 3 },
+      ],
+    },
+    {
+      question: "What's your greatest strength?",
+      options: [
+        { label: 'Patience', score: 0 },
+        { label: 'Curiosity', score: 1 },
+        { label: 'Planning', score: 2 },
+        { label: 'Chaos energy', score: 3 },
+      ],
+    },
+    {
+      question: 'Choose a celestial body:',
+      options: [
+        { label: 'The Moon 🌕', score: 0 },
+        { label: 'A comet ☄️', score: 1 },
+        { label: 'A black hole 🕳️', score: 2 },
+        { label: 'A rogue planet 🌑', score: 3 },
+      ],
+    },
+    {
+      question: "What's your social energy?",
+      options: [
+        { label: 'Low-key lurker', score: 0 },
+        { label: 'One-on-one convos', score: 1 },
+        { label: 'Team brainstormer', score: 2 },
+        { label: 'Life of the party', score: 3 },
+      ],
+    },
+    {
+      question: "What's your spirit time of day?",
+      options: [
+        { label: '3am under the stars 🌌', score: 0 },
+        { label: 'Sunrise hustle 🌅', score: 1 },
+        { label: 'Midday focus ☀️', score: 2 },
+        { label: 'Midnight rebellion 🌒', score: 3 },
+      ],
+    },
+    {
+      question: 'What animal resonates with you most?',
+      options: [
+        { label: 'Owl 🦉', score: 0 },
+        { label: 'Fox 🦊', score: 1 },
+        { label: 'Bear 🐻', score: 2 },
+        { label: 'Dragon 🐉', score: 3 },
+      ],
+    },
+  ],
+  results: [
+    { min: 0, max: 6, label: '🌙 Mooncat — Mysterious, calm, and observant.' },
+    { min: 7, max: 14, label: '🦊 Solar Fox — Clever, curious, and adaptable.' },
+    { min: 15, max: 22, label: '🐻 Cosmic Bear — Grounded, strong, and thoughtful.' },
+    { min: 23, max: 30, label: '🐉 Galactic Dragon — Wild, bold, and unstoppable.' },
+  ],
+}
+
+export async function seedQuiz(payload: Payload): Promise<void> {
+  const existing = await payload.find({ collection: 'quizzes', limit: 1 })
+  if (existing.totalDocs > 0) return
+
+  await payload.create({ collection: 'quizzes', data: sampleQuiz as any })
+  payload.logger.info('Seeded sample quiz.')
+}
