@@ -1,7 +1,7 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import QuizForm from './components/QuizForm'
-import Link from 'next/link'
+import SiteHeader from './components/SiteHeader'
 
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr]
@@ -19,9 +19,9 @@ export default async function HomePage() {
 
   if (!docs.length) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-400">No quiz found. Check database seed.</p>
-      </main>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-sm text-[#888888]">No quiz found. Check database seed.</p>
+      </div>
     )
   }
 
@@ -38,28 +38,10 @@ export default async function HomePage() {
     ),
   }))
 
-  const results = ((quiz.results ?? []) as any[]).map((r: any) => ({
-    min: r.min,
-    max: r.max,
-    label: r.label,
-  }))
-
   return (
-    <main className="min-h-screen bg-gray-950 text-white">
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <QuizForm
-          quizId={String(quiz.id)}
-          title={quiz.title}
-          questions={questions}
-          results={results}
-        />
-
-        <div className="mt-12 pt-8 border-t border-white/5 text-center">
-          <Link href="/lookup" className="text-sm text-gray-500 hover:text-gray-300 transition-colors">
-            Already took the quiz? Look up your results
-          </Link>
-        </div>
-      </div>
-    </main>
+    <div className="min-h-screen bg-white">
+      <SiteHeader />
+      <QuizForm quizId={String(quiz.id)} title={quiz.title} questions={questions} />
+    </div>
   )
 }

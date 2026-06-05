@@ -28,12 +28,10 @@ type SelectedOption = {
 export async function submitQuiz(
   quizId: string,
   selected: SelectedOption[],
-  notes: string,
-  email: string,
 ): Promise<QuizResult> {
   const payload = await getPayload({ config })
 
-  const quiz = await payload.findByID({ collection: 'quizzes', id: quizId })
+  const quiz = await payload.findByID({ collection: 'quizzes', id: Number(quizId) })
 
   const results = (quiz.results ?? []) as { min: number; max: number; label: string }[]
 
@@ -46,21 +44,32 @@ export async function submitQuiz(
     score: s.score,
   }))
 
-  if (email) {
-    await payload.create({
-      collection: 'submissions',
-      data: {
-        quiz: quizId,
-        score,
-        result: label,
-        breakdown,
-        email,
-        notes: notes || undefined,
-      } as any,
-    })
-  }
+  return { score, label, breakdown }
+}
 
-  return { score, label, breakdown, notes: notes || undefined, email: email || undefined }
+export async function saveResult(
+  quizId: string,
+  result: QuizResult,
+  notes: string,
+  email: string,
+): Promise<{ saved: boolean }> {
+  if (!email) return { saved: false }
+
+  const payload = await getPayload({ config })
+
+  await payload.create({
+    collection: 'submissions',
+    data: {
+      quiz: Number(quizId),
+      score: result.score,
+      result: result.label,
+      breakdown: result.breakdown,
+      email,
+      notes: notes || undefined,
+    } as any,
+  })
+
+  return { saved: true }
 }
 
 export async function lookupByEmail(email: string): Promise<QuizResult | null> {

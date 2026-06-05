@@ -1,41 +1,58 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { submitQuiz } from '@/actions/quiz'
+import { submitQuiz, saveResult } from '@/actions/quiz'
 import type { QuizResult } from '@/actions/quiz'
 import ResultView from './ResultView'
 
 type Option = { label: string; score: number }
 type Question = { id: string; question: string; options: Option[] }
-type QuizResults = { min: number; max: number; label: string }[]
 
 type Props = {
   quizId: string
   title: string
   questions: Question[]
-  results: QuizResults
 }
 
+type SaveState = 'idle' | 'saving' | 'saved' | 'error'
+
 export default function QuizForm({ quizId, title, questions }: Props) {
+  const [currentIndex, setCurrentIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, { label: string; score: number }>>({})
+  const [result, setResult] = useState<QuizResult | null>(null)
+  const [submitError, setSubmitError] = useState('')
+  const [isSubmitting, startSubmitTransition] = useTransition()
+
   const [notes, setNotes] = useState('')
   const [email, setEmail] = useState('')
-  const [result, setResult] = useState<QuizResult | null>(null)
-  const [error, setError] = useState('')
-  const [isPending, startTransition] = useTransition()
+  const [saveState, setSaveState] = useState<SaveState>('idle')
+  const [isSaving, startSaveTransition] = useTransition()
 
-  const allAnswered = questions.every((q) => answers[q.id] !== undefined)
+  const current = questions[currentIndex]
+  const isLast = currentIndex === questions.length - 1
+  const currentAnswer = answers[current?.id]
+  const answeredCount = Object.keys(answers).length
+  const progressPct = (answeredCount / questions.length) * 100
 
-  function retake() {
-    setAnswers({})
-    setNotes('')
-    setEmail('')
-    setResult(null)
-    setError('')
+  function selectOption(opt: Option) {
+    setAnswers((prev) => ({ ...prev, [current.id]: opt }))
+  }
+
+  function handleNext() {
+    if (!currentAnswer) return
+    if (isLast) {
+      handleSubmit()
+    } else {
+      setCurrentIndex((i) => i + 1)
+    }
+  }
+
+  function handleBack() {
+    if (currentIndex > 0) setCurrentIndex((i) => i - 1)
   }
 
   function handleSubmit() {
-    setError('')
+    setSubmitError('')
     const selected = questions.map((q) => ({
       questionId: q.id,
       question: q.question,
@@ -43,56 +60,90 @@ export default function QuizForm({ quizId, title, questions }: Props) {
       score: answers[q.id]!.score,
     }))
 
-    startTransition(async () => {
+    startSubmitTransition(async () => {
       try {
-        const res = await submitQuiz(quizId, selected, notes, email)
+        const res = await submitQuiz(quizId, selected)
         setResult(res)
       } catch {
-        setError('Something went wrong. Please try again.')
+        setSubmitError('Something went wrong. Please try again.')
       }
     })
   }
 
+  function handleSave() {
+    if (!email || !result) return
+    setSaveState('saving')
+    startSaveTransition(async () => {
+      try {
+        await saveResult(quizId, result, notes, email)
+        setSaveState('saved')
+      } catch {
+        setSaveState('error')
+      }
+    })
+  }
+
+  function retake() {
+    setCurrentIndex(0)
+    setAnswers({})
+    setResult(null)
+    setSubmitError('')
+    setNotes('')
+    setEmail('')
+    setSaveState('idle')
+  }
+
   if (result) {
     return (
-      <div className="space-y-6">
-        <ResultView
-          score={result.score}
-          label={result.label}
-          breakdown={result.breakdown}
-          notes={result.notes}
-          onRetake={retake}
-        />
-        {result.email && (
-          <p className="text-center text-sm text-gray-500">
-            Results saved for {result.email}
-          </p>
-        )}
-      </div>
+      <ResultView
+        score={result.score}
+        label={result.label}
+        breakdown={result.breakdown}
+        notes={notes}
+        email={email}
+        saveState={saveState}
+        isSaving={isSaving}
+        onNotesChange={setNotes}
+        onEmailChange={setEmail}
+        onSave={handleSave}
+        onRetake={retake}
+      />
     )
   }
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold text-center">{title}</h1>
+    <div>
+      <div className="h-0.5 bg-border w-full">
+        <div
+          className="h-full bg-accent transition-all duration-300"
+          style={{ width: `${progressPct}%` }}
+        />
+      </div>
 
-      {questions.map((q, index) => (
-        <div key={q.id} className="rounded-xl border border-white/10 p-5 space-y-3">
-          <p className="font-medium text-gray-200">
-            <span className="text-indigo-400 mr-2">{index + 1}.</span>
-            {q.question}
+      <div className="max-w-3xl mx-auto px-6 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <span className="text-xs font-medium uppercase tracking-widest text-muted">
+            {currentIndex + 1} / {questions.length}
+          </span>
+          <span className="text-xs text-muted">{title}</span>
+        </div>
+
+        <div className="mb-10">
+          <p className="text-2xl font-semibold text-text leading-snug mb-8">
+            {current.question}
           </p>
+
           <div className="space-y-2">
-            {q.options.map((opt) => {
-              const selected = answers[q.id]?.label === opt.label
+            {current.options.map((opt) => {
+              const selected = currentAnswer?.label === opt.label
               return (
                 <button
                   key={opt.label}
-                  onClick={() => setAnswers((prev) => ({ ...prev, [q.id]: opt }))}
-                  className={`w-full text-left px-4 py-2.5 rounded-lg border transition-colors ${
+                  onClick={() => selectOption(opt)}
+                  className={`w-full text-left px-5 py-4 border text-sm font-medium transition-colors ${
                     selected
-                      ? 'bg-indigo-600 border-indigo-500 text-white'
-                      : 'border-white/10 text-gray-300 hover:border-indigo-500/50 hover:bg-white/5'
+                      ? 'bg-accent border-accent text-white'
+                      : 'bg-white border-border text-text hover:border-text'
                   }`}
                 >
                   {opt.label}
@@ -101,47 +152,30 @@ export default function QuizForm({ quizId, title, questions }: Props) {
             })}
           </div>
         </div>
-      ))}
 
-      <div className="rounded-xl border border-white/10 p-5 space-y-4">
-        <div className="space-y-1">
-          <label htmlFor="notes" className="block text-sm text-gray-400">
-            Notes (optional)
-          </label>
-          <textarea
-            id="notes"
-            rows={3}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Anything on your mind..."
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500 resize-none"
-          />
-        </div>
+        {submitError && (
+          <p className="text-red-600 text-sm mb-4">{submitError}</p>
+        )}
 
-        <div className="space-y-1">
-          <label htmlFor="email" className="block text-sm text-gray-400">
-            Email (optional — saves your result)
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500"
-          />
+        <div className="flex items-center gap-3">
+          {currentIndex > 0 && (
+            <button
+              onClick={handleBack}
+              className="px-6 py-3 border border-border text-sm font-medium text-muted hover:border-text hover:text-text transition-colors"
+            >
+              Back
+            </button>
+          )}
+
+          <button
+            disabled={!currentAnswer || isSubmitting}
+            onClick={handleNext}
+            className="flex-1 py-3 bg-text text-white text-sm font-medium hover:bg-[#333] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            {isSubmitting ? 'Calculating...' : isLast ? 'See my result' : 'Next'}
+          </button>
         </div>
       </div>
-
-      {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-
-      <button
-        disabled={!allAnswered || isPending}
-        onClick={handleSubmit}
-        className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-      >
-        {isPending ? 'Calculating...' : 'Submit quiz'}
-      </button>
     </div>
   )
 }
